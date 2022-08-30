@@ -1,5 +1,6 @@
 import smtplib, email
 from pathlib import Path
+from typing import List
 
 
 class Mail:
@@ -7,9 +8,15 @@ class Mail:
         self.host = host
         self.port = port
         self.domain = domain
-        self.sender = f"{sender}@{self.domain}"
+        self._sender = f"{sender}@{self.domain}"
         self.server = smtplib.SMTP()
         self.message = email.message.EmailMessage()
+
+    def sender(self):
+        return self._sender
+
+    def set_sender(self, sender: str):
+        self._sender = f"{sender}@{self.domain}"
 
     def connect_to_smtp_server(self):
         """Try to connect to SMTP server"""
@@ -20,15 +27,20 @@ class Mail:
         except:
             raise Exception('Something went wrong when trying to connect to SMTP server')
 
-    def create_message(self, subject: str, receiver: str, msg: str, sender=''):
+    def create_message(self, receiver: List[str], subject: str, msg: str, sender: str = '', cc: List[str] = None
+                       , bcc: List[str] = None):
         """Add various information to message"""
+        if cc is None:
+            cc = ['']
         if sender == '':
-            sender = self.sender
+            sender = self.sender()
         else:
             sender = f"{sender}@{self.domain}"
 
         self.message['From'] = sender
-        self.message['To'] = receiver
+        self.message['To'] = ', '.join(receiver)
+        self.message['Cc'] = ', '.join(cc)
+        self.message['Bcc'] = ', '.join(bcc)
         self.message['Subject'] = subject
         self.message.set_content(msg)
 
@@ -44,7 +56,7 @@ class Mail:
             raise Exception('File attachment not exist')
 
     def add_attachment_files(self, path: str):
-        """Adding all files in message of given path"""
+        """Adding all files of given path in message"""
         folder_object = Path(path)
         if folder_object.is_dir():
             folder = folder_object.glob('*')
@@ -59,7 +71,7 @@ class Mail:
         if self.message['From'] == '' or self.message['To'] == '':
             raise Exception('Sender or receiver(s) information is missing')
         self.connect_to_smtp_server()
-        self.server.sendmail(from_addr=self.message['From'], to_addrs=self.message['To'], msg=self.message.as_string())
+        self.server.send_message(self.message)
         print('Message was sent. ')
         self.disconnect()
 
