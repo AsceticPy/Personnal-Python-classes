@@ -32,6 +32,10 @@ class Mail:
         """Add various information to message"""
         if cc is None:
             cc = ['']
+
+        if bcc is None:
+            bcc = ['']
+
         if sender == '':
             sender = self.sender()
         else:
