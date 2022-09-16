@@ -1,15 +1,10 @@
-from genericpath import isfile
 import json
 import platform
-import time
-import shutil
-
 
 from dotenv import dotenv_values
 from pathlib import Path
-from pyautogui import press
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException, WebDriverException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import FirefoxProfile
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -17,19 +12,14 @@ from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
-
 from typing import List, Dict
-
-from webdriver_manager.firefox import GeckoDriverManager
 
 
 CONFIGURATION_SELENIUM = dotenv_values(".env")
 
 class Firefox_control():
-    def __init__(self, login:str, password: str, load_strategie: str = 'eager') -> None:
+    def __init__(self, load_strategie: str = 'eager') -> None:
         self.url = CONFIGURATION_SELENIUM['url']
-        self.login = login
-        self.password = password
         self.connect = False
         self._binary_location = CONFIGURATION_SELENIUM['binary_dir']
         self._options = self.set_options(load_strategie)
